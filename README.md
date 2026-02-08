@@ -12,17 +12,21 @@ This repository contains the implementation of a two-stage training framework fo
 
 The project runs on a Linux environment with the following specifications. You must match these versions to ensure compatibility with the custom CUDA kernels.
 
+* **Language:** Python 3.8
+* **CUDA Version:** 12.2
+* **Framework:** PyTorch 2.2.1
+* **Core Components:**
+* `mamba_ssm==1.1.2`
+* `torchvision==0.17.1`
+* `numpy==1.24.4`
+* `einops==0.8.1`
+* `opencv-python==4.11.0.86`
 
-  ```bash
-  conda create -n your_env_name python=x.x
-  conda activate your_env_name
-  pip install -r reqirements.txt
-  pip install -e .
-  ```
+
 
 ---
 
-## 2. VMamba environment Setup
+## 2. Environment Setup
 
 The VMamba model requires a specific kernel for the selective scan operation. You need to compile this component manually on your local machine.
 
@@ -31,6 +35,13 @@ The VMamba model requires a specific kernel for the selective scan operation. Yo
 cd selective_scan && pip install .
 
 ```
+
+
+The framework requires a pretrained CLIP backbone for feature extraction. You must download the weight files from [https://huggingface.co/openai/clip-vit-large-patch14/tree/main]. Place the downloaded files into the following directory:
+pretrain/clip/clip-vit-large-patch14
+
+
+
 
 ---
 

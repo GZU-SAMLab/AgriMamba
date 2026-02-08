@@ -22,7 +22,7 @@ The project runs on a Linux environment with the following specifications. You m
 
 ---
 
-## 2. Environment Setup
+## 2. VMamba environment Setup
 
 The VMamba model requires a specific kernel for the selective scan operation. You need to compile this component manually on your local machine.
 

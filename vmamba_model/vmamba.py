@@ -1351,7 +1351,6 @@ class VSSM(nn.Module):
 
         self.layers = nn.ModuleList()
         for i_layer in range(self.num_layers):
-              # 1. 创建下采样模块(除最后一层外)
             downsample = _make_downsample(
                 self.dims[i_layer], 
                 self.dims[i_layer + 1], 
@@ -1359,7 +1358,6 @@ class VSSM(nn.Module):
                 channel_first=self.channel_first,
             ) if (i_layer < self.num_layers - 1) else nn.Identity()
 
-            # 2. 创建并添加VSS层块
             self.layers.append(self._make_layer(
                 dim = self.dims[i_layer],
                 drop_path = dpr[sum(depths[:i_layer]):sum(depths[:i_layer + 1])],
@@ -1367,7 +1365,7 @@ class VSSM(nn.Module):
                 norm_layer=norm_layer,
                 downsample=downsample,
                 channel_first=self.channel_first,
-                # =================    SSM相关参数
+                # =================
                 ssm_d_state=ssm_d_state,
                 ssm_ratio=ssm_ratio,
                 ssm_dt_rank=ssm_dt_rank,
@@ -1377,7 +1375,7 @@ class VSSM(nn.Module):
                 ssm_drop_rate=ssm_drop_rate,
                 ssm_init=ssm_init,
                 forward_type=forward_type,
-                # =================    MLP相关参数
+                # =================
                 mlp_ratio=mlp_ratio,
                 mlp_act_layer=mlp_act_layer,
                 mlp_drop_rate=mlp_drop_rate,

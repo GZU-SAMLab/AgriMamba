@@ -37,11 +37,13 @@ The framework requires a pretrained CLIP backbone for feature extraction. You mu
 pretrain/clip/clip-vit-large-patch14
 
 
+## 3. Dataset
+Regarding the dataset acquisition, please contact us at [http://agrimamba.samlab.cn/] to obtain the necessary files.
 
 
 ---
 
-## 3. Training Pipeline
+## 4. Training Pipeline
 
 The training process follows a sequential two-stage strategy. You must save the outputs of the first stage to initialize the second stage.
 
@@ -76,7 +78,7 @@ python train_stage2.py \
 
 ---
 
-## 4. Evaluation
+## 5. Evaluation
 
 The evaluation script combines the best checkpoints from both stages. It processes the test set and saves intermediate visualization results for analysis.
 

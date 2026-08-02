@@ -36,6 +36,10 @@ cd selective_scan && pip install .
 The framework requires a pretrained CLIP backbone for feature extraction. You must download the weight files from [https://huggingface.co/openai/clip-vit-large-patch14/tree/main]. Place the downloaded files into the following directory:
 pretrain/clip/clip-vit-large-patch14
 
+
+
+
+
 pretrain checkpoint
 
 - download from [link](https://drive.google.com/file/d/1O9P6XLuWtUxFa70vwrYCRVedRAFutczV/view?usp=sharing) (This is the VMamba checkpoint pretrained on ImageNet. We re-upload it since the original VMamba link has broken.)

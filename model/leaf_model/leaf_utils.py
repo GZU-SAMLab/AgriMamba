@@ -9,15 +9,7 @@ from torch.optim import AdamW
 from .leaf_config import _C as config
 
 def dice_loss(inputs, targets, epoch=None):
-    """
-    Compute the DICE loss, similar to generalized IOU for masks
-    Args:
-        inputs: A float tensor of arbitrary shape.
-                The predictions for each example.
-        targets: A float tensor with the same shape as inputs. Stores the binary
-                 classification label for each element in inputs
-                (0 for the negative class and 1 for the positive class).
-    """
+
 
     inputs = inputs.sigmoid()
     if epoch is not None and epoch >= 8:
@@ -32,21 +24,7 @@ def dice_loss(inputs, targets, epoch=None):
     return loss.mean()
 
 def sigmoid_focal_loss(inputs, targets, epoch=None, alpha: float = 0.25, gamma: float = 2):
-    """
-    Loss used in RetinaNet for dense detection: https://arxiv.org/abs/1708.02002.
-    Args:
-        inputs: A float tensor of arbitrary shape.
-                The predictions for each example.
-        targets: A float tensor with the same shape as inputs. Stores the binary
-                 classification label for each element in inputs
-                (0 for the negative class and 1 for the positive class).
-        alpha: (optional) Weighting factor in range (0,1) to balance
-                positive vs negative examples. Default = -1 (no weighting).
-        gamma: Exponent of the modulating factor (1 - p_t) to
-               balance easy vs hard examples.
-    Returns:
-        Loss tensor
-    """
+
 
     prob = inputs.sigmoid()
     if epoch is not None and epoch >= 8:
@@ -72,7 +50,7 @@ class ImageTextCorr(nn.Module):
             nn.GELU(),
             nn.Dropout(dropout),
         )
-        
+
         self.text_proj = nn.Sequential(
             nn.Linear(text_dim, hidden_dim),
             nn.GELU(),
@@ -91,7 +69,7 @@ class ImageTextCorr(nn.Module):
         B, C, L = l_feat.shape
         vis = self.vis_proj(einops.rearrange(x, 'b c h w -> b h w c'))
         txt = self.text_proj(einops.rearrange(l_feat, 'b c l -> b l c'))
-        cost = torch.einsum("bhwc,blc->bhwl", vis, txt) #s=h*w
+        cost = torch.einsum("bhwc,blc->bhwl", vis, txt)
 
         cost = einops.rearrange(cost, 'b h w c -> b c h w')
         feat = self.unsqueeze(cost)
@@ -160,18 +138,18 @@ def load_ckpt(backbone, model_size):
         name = "vssm_base_0229_ckpt_epoch_237.pth"
         path = f"pretrain/{name}"
     elif model_size in ['S', 'small', 'tiny']:
-        # 对于小模型，跳过预训练权重加载
+
         print(f"Skipping pretrained weights for model_size: {model_size}")
         return backbone, ([], [])
     else:
-        # 默认跳过预训练权重加载
+
         print(f"Unknown model_size: {model_size}, skipping pretrained weights")
         return backbone, ([], [])
-        
+
     if not os.path.exists(path):
         print(f"Pretrained weights not found at {path}, skipping")
         return backbone, ([], [])
-        
+
     st = torch.load(path, map_location='cpu')
     ret = backbone.load_state_dict(st['model'], strict=False)
     ret0_toprint = []
@@ -184,12 +162,12 @@ def load_ckpt(backbone, model_size):
 
 def update_mamba_config(model_size):
     config_dict = dict(
-            patch_size=config.PATCH_SIZE, 
-            in_chans=config.IN_CHANS, 
-            num_classes=config.NUM_CLASSES, 
-            depths=config.DEPTHS, 
-            dims=config.EMBED_DIM, 
-            # ===================
+            patch_size=config.PATCH_SIZE,
+            in_chans=config.IN_CHANS,
+            num_classes=config.NUM_CLASSES,
+            depths=config.DEPTHS,
+            dims=config.EMBED_DIM,
+
             ssm_d_state=config.SSM_D_STATE,
             ssm_ratio=config.SSM_RATIO,
             ssm_rank_ratio=config.SSM_RANK_RATIO,
@@ -200,11 +178,11 @@ def update_mamba_config(model_size):
             ssm_drop_rate=config.SSM_DROP_RATE,
             ssm_init=config.SSM_INIT,
             forward_type=config.SSM_FORWARDTYPE,
-            # ===================
+
             mlp_ratio=config.MLP_RATIO,
             mlp_act_layer=config.MLP_ACT_LAYER,
             mlp_drop_rate=config.MLP_DROP_RATE,
-            # ===================
+
             drop_path_rate=config.DROP_PATH_RATE,
             patch_norm=config.PATCH_NORM,
             norm_layer=config.NORM_LAYER,
@@ -217,8 +195,8 @@ def update_mamba_config(model_size):
     if model_size == "base":
         config_dict.update(dict(
             patch_size=4,
-            # 移除硬编码的depths，让配置文件的DEPTHS设置生效
-            # depths=[2, 9, 2],  # 注释掉硬编码的depths
+
+
             dims=[128, 128*2, 128*4],
             ssm_d_state=1,
             ssm_conv_bias=False,

@@ -14,10 +14,10 @@ The project runs on a Linux environment with the following specifications. You m
 
 
   ```bash
-  conda create -n your_env_name python=x.x
+  conda create -n your_env_name 
   conda activate your_env_name
   pip install -r reqirements.txt
-  pip install -e .
+
   ```
 
 ---
@@ -47,7 +47,7 @@ Regarding the dataset acquisition, please contact us at [http://agrimamba.samlab
 
 The training process follows a sequential two-stage strategy. You must save the outputs of the first stage to initialize the second stage.
 
-### Stage I: LMLS
+### Step 1: LMLS
 
 This initial stage focuses on the primary features of the plant leaves. The model trains for 50 epochs with a small learning rate.
 
@@ -61,7 +61,21 @@ python train_stage1.py \
 
 ```
 
-### Stage II: TMLS
+### Step 2: Generate RGB image of leaves
+
+This step filters out the complex background, leaving only the target leaves
+
+
+```bash
+python segmentation_model/generate_stage1_results.py \
+    --checkpoint ./output/stage1/best_stage1_checkpoint.pth \
+    --data-set dataset_10350 \
+    --output-dir ./output/stage1/stage1_out_img \
+    --batch-size 16
+
+```
+
+### Step 3: TMLS
 
 This stage refines the results by focusing on specific lesion areas. It uses the visual outputs from Stage I as a reference for the new training cycle.
 
@@ -83,15 +97,19 @@ python train_stage2.py \
 The evaluation script combines the best checkpoints from both stages. It processes the test set and saves intermediate visualization results for analysis.
 
 ```bash
-python ./evaluation.py \
---answer ./dataset/dataset_10350/test \
---leaf-checkpoint output/stage1/best_stage1_checkpoint.pth \
---lesion-checkpoint output/stage2/best_stage2_checkpoint.pth \
---output-dir ./output/evaluation \
---batch-size 4 \
---save-intermediate
+
+python evaluate.py \
+    --leaf-checkpoint output/stage1/best_stage1_checkpoint.pth \
+    --lesion-checkpoint output/stage2/best_stage2_checkpoint.pth \
+    --data-set dataset_10350 \
+    --output-dir ./output/evaluation \
+    --save-intermediate
+
 
 ```
 
+
+
 ---
+
 

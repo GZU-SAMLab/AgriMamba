@@ -13,12 +13,8 @@ import einops
 from vmamba_model.vmamba import SS2D, VSSM, LayerNorm2d, Linear2d
 
 
-
-
-
-
 class Encoder(VSSM):
-    """still extract feature"""
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.classifier = None
@@ -26,10 +22,8 @@ class Encoder(VSSM):
         use_checkpoint = kwargs['use_checkpoint']
         norm_layer = kwargs['norm_layer']
         self.pos_embed = None
-        # 移除不再使用的text_guidencee
 
 
-        # 处理dims参数：如果是整数，转换为列表
         if isinstance(dims, int):
             dims = [int(dims * 2 ** i_layer) for i_layer in range(self.num_layers)]
 
@@ -48,16 +42,15 @@ class Encoder(VSSM):
             ln=nn.LayerNorm,
             ln2d=LayerNorm2d,
             bn=nn.BatchNorm2d,
-        ) 
+        )
         norm_layer: nn.Module = _NORMLAYERS.get(norm_layer.lower(), None)
         _ACTLAYERS = dict(
-            silu=nn.SiLU, 
-            gelu=nn.GELU, 
-            relu=nn.ReLU, 
+            silu=nn.SiLU,
+            gelu=nn.GELU,
+            relu=nn.ReLU,
             sigmoid=nn.Sigmoid,
         )
         ssm_act_layer: nn.Module = _ACTLAYERS.get(kwargs['ssm_act_layer'].lower(), None)
-
 
 
     def _add_pos_embed(self, x):
@@ -84,16 +77,16 @@ class Encoder(VSSM):
         inner = layer.blocks(x)
         out = layer.downsample(inner)
         return out, inner
-    
+
     def forward(self, x):
-        # 移除文本相关参数：l_feat, l_mask, pooler_out
+
         x = self.patch_embed(x)
         x = self._add_pos_embed(x)
-        outs = []            # 存储各层输出特征
-        
+        outs = []
+
         for i, layer in enumerate(self.layers):
-            x, inner = self.forward_layer(x, layer)     #每一个layer由一系列block(VSS2S)  inner:当前层特征, x:下采样后特征
-            _, c, h, w = inner.shape                       # 获取特征图尺寸
+            x, inner = self.forward_layer(x, layer)
+            _, c, h, w = inner.shape
             out = inner
 
 
@@ -105,4 +98,3 @@ class Encoder(VSSM):
             outs.append(out)
 
         return outs
-

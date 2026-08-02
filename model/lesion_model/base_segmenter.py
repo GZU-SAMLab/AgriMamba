@@ -1,3 +1,4 @@
+import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from transformers import CLIPTextModel, CLIPTokenizerFast
@@ -12,6 +13,11 @@ class BaseSegmenter(nn.Module):
         self.decoder = None
         self.tokenizer = CLIPTokenizerFast.from_pretrained('./pretrain/clip/clip-vit-large-patch14')
         self.text_encoder = CLIPTextModel.from_pretrained('./pretrain/clip/clip-vit-large-patch14')
+        self.freeze_clip_text_encoder = True
+        if self.freeze_clip_text_encoder:
+            for param in self.text_encoder.parameters():
+                param.requires_grad = False
+            self.text_encoder.eval()
 
     def forward(self, x, text, mask=None, **kwargs):
         encode_text = self.tokenizer(text, padding='max_length', truncation=True, max_length=20, return_tensors='pt')
@@ -19,21 +25,26 @@ class BaseSegmenter(nn.Module):
         l_mask = encode_text['attention_mask'].to(x.device, non_blocking=True)
 
         input_shape = x.shape[-2:]
-        ret = self.text_encoder(text, attention_mask=l_mask)  # (6, 10, 768)
+        if self.freeze_clip_text_encoder:
+            self.text_encoder.eval()
+            with torch.no_grad():
+                ret = self.text_encoder(text, attention_mask=l_mask)
+        else:
+            ret = self.text_encoder(text, attention_mask=l_mask)
         l_feats = ret['last_hidden_state']
-        l_feats = l_feats.permute(0, 2, 1)  # (B, 768, N_l) to make Conv1d happy
-        l_mask = l_mask.unsqueeze(dim=-1)  # (batch, N_l, 1)
+        l_feats = l_feats.permute(0, 2, 1)
+        l_mask = l_mask.unsqueeze(dim=-1)
         if 'pooler_output' in ret:
             pooler_out = ret['pooler_output']
         else:
             pooler_out = None
-        
+
         features = self.backbone(x, l_feats, l_mask, pooler_out=pooler_out)
         x_c1, x_c2, x_c3, x_c4 = features
         pred = self.decoder([x_c4, x_c3, x_c2, x_c1], l_feats, l_mask)
         pred = F.interpolate(pred, input_shape, mode='bilinear', align_corners=True)
-        
-        # loss
+
+
         if self.training and mask is not None:
             loss = dice_loss(pred, mask) + sigmoid_focal_loss(pred, mask, alpha=-1, gamma=0)
             return pred.detach(), mask, loss

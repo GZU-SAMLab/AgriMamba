@@ -42,7 +42,7 @@ pretrain/clip/clip-vit-large-patch14
 
 pretrain checkpoint
 
-- download from [link](https://drive.google.com/file/d/1O9P6XLuWtUxFa70vwrYCRVedRAFutczV/view?usp=sharing) (This is the VMamba checkpoint pretrained on ImageNet. We re-upload it since the original VMamba link has broken.)
+- download from [link](https://drive.google.com/file/d/1Q3Hlrf4aaiXkDxS_5coDtmUz0L3iMo2O/view?usp=sharing) (This is the VMamba checkpoint pretrained on ImageNet. We re-upload it since the original VMamba link has broken.)
 - Create a ``pretrain/`` folder and place the checkpoint in it
 
 
